@@ -1,58 +1,66 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-
-export interface TelemetryStreamPayload {
-  variableId: string; // e.g., 'ALI3N_BRAKE', 'ALI3N_THROTTLE'
-  tag: 'RED' | 'RED+BLUE' | 'GREEN' | string;
-  data: number[];
-}
-
-export interface TelemetryState {
-  [variableId: string]: {
-    tag: string;
-    data: number[];
-  };
-}
+import { useState, useRef, useCallback } from 'react';
 
 export function useTelemetryRouter() {
-  const [streams, setStreams] = useState<TelemetryState>({});
+  const [streams, setStreams] = useState<any>({});
   const [isIngesting, setIsIngesting] = useState<boolean>(false);
+  const [progressMB, setProgressMB] = useState<number>(0);
+  const [totalMB, setTotalMB] = useState<number>(0);
+  const [currentChunkRows, setCurrentChunkRows] = useState<any[]>([]);
+  const [headers, setHeaders] = useState<string[]>([]);
+  
   const workerRef = useRef<Worker | null>(null);
 
-  useEffect(() => {
-    // Initialize Web Worker
-    workerRef.current = new Worker(
-      new URL('./telemetry.worker.ts', import.meta.url),
-      { type: 'module' }
-    );
+  const ingestFileInChunks = useCallback((file: File) => {
+    setIsIngesting(true);
+    setStreams({});
+    
+    const CHUNK_SIZE = 1 * 1024 * 1024; // Exactly 1 MB chunks
+    const totalSize = file.size;
+    const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
+    setTotalMB(totalChunks);
 
-    // Listen for isolated stream payloads from worker
+    if (!workerRef.current) {
+      workerRef.current = new Worker(
+        new URL('./telemetry.worker.ts', import.meta.url),
+        { type: 'module' }
+      );
+    }
+
     workerRef.current.onmessage = (event: MessageEvent) => {
       const { type, payload } = event.data;
-
-      if (type === 'TELEMETRY_STREAM') {
-        const { variableId, tag, data }: TelemetryStreamPayload = payload;
-
-        // Functional update isolates updates by variableId
-        setStreams((prev) => ({
-          ...prev,
-          [variableId]: { tag, data },
-        }));
+      if (type === 'CHUNK_PROCESSED') {
+        setHeaders(payload.headers);
+        setCurrentChunkRows(payload.rows);
+        setProgressMB(payload.chunkIndex + 1);
       } else if (type === 'INGESTION_COMPLETE') {
         setIsIngesting(false);
       }
     };
 
-    return () => {
-      workerRef.current?.terminate();
+    // Read and feed 1MB at a time asynchronously
+    let offset = 0;
+    let chunkIndex = 0;
+
+    const readNextChunk = () => {
+      if (offset >= totalSize) return;
+      const slice = file.slice(offset, offset + CHUNK_SIZE);
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const chunkText = e.target?.result as string;
+        if (chunkText && workerRef.current) {
+          workerRef.current.postMessage({ chunkText, chunkIndex, totalChunks });
+        }
+        offset += CHUNK_SIZE;
+        chunkIndex++;
+        // Small delay to let UI breathe between MB feeds
+        setTimeout(readNextChunk, 50); 
+      };
+      reader.readAsText(slice);
     };
+
+    readNextChunk();
   }, []);
 
-  const ingestCSV = useCallback((csvText: string) => {
-    if (!workerRef.current) return;
-    setIsIngesting(true);
-    setStreams({}); // Clear previous lap data
-    workerRef.current.postMessage({ csvText });
-  }, []);
-
-  return { ingestCSV, streams, isIngesting };
+  return { ingestFileInChunks, streams, isIngesting, progressMB, totalMB, currentChunkRows, headers };
 }
