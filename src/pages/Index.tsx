@@ -8,18 +8,18 @@ import { GBotConsole } from '../components/GBotConsole';
 
 export default function GBotIndex() {
   const [driverName, setDriverName] = useState<string>('');
-  const [tempDriverInput, setTempDriverInput] = useState<string>('');
+  const [tempInput, setTempInput] = useState<string>('');
   const [sessionActive, setSessionActive] = useState(false);
   const [frames, setFrames] = useState<TelemetryFrame[]>([]);
   const [prediction, setPrediction] = useState<StintPrediction | null>(null);
   const [activeFilename, setActiveFilename] = useState<string>('No session file loaded');
 
-  const handleDriverSubmit = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (tempDriverInput.trim()) {
-      setDriverName(tempDriverInput.trim().toUpperCase());
+    if (tempInput.trim()) {
+      setDriverName(tempInput.trim().toUpperCase());
     } else {
-      setDriverName('ANONYMOUS DRIVER');
+      setDriverName('RACER_01');
     }
   };
 
@@ -41,29 +41,32 @@ export default function GBotIndex() {
   if (!driverName) {
     return (
       <div className="min-h-screen bg-[#06070B] text-white flex items-center justify-center font-mono px-4">
-        <div className="max-w-md w-full p-8 rounded-2xl bg-black/60 border border-cyan-500/30 backdrop-blur-xl space-y-6 shadow-2xl">
+        <div className="max-w-md w-full p-8 rounded-2xl bg-black/80 border border-cyan-500/40 backdrop-blur-2xl space-y-6 shadow-[0_0_50px_rgba(6,182,212,0.15)]">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-xs tracking-widest text-cyan-400 font-bold uppercase">G-BOT // AUTHENTICATION GATE</span>
           </div>
           <div className="space-y-2">
-            <h1 className="text-xl font-bold tracking-tight text-white">ENTER DRIVER CALL SIGN</h1>
-            <p className="text-xs text-white/50">Identify yourself to link telemetry feeds and calibrate the pitwall coach.</p>
+            <h1 className="text-xl font-extrabold tracking-tight text-white">SECURE RACER ACCESS</h1>
+            <p className="text-xs text-white/50">Enter your official driver call sign or racer code to initialize telemetry telemetry channels.</p>
           </div>
-          <form onSubmit={handleDriverSubmit} className="space-y-4">
-            <input
-              type="text"
-              value={tempDriverInput}
-              onChange={(e) => setTempDriverInput(e.target.value)}
-              placeholder="e.g. MAX V / LEWIS H / YOUR NAME"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition-colors"
-              autoFocus
-            />
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Call Sign</label>
+              <input
+                type="text"
+                value={tempInput}
+                onChange={(e) => setTempInput(e.target.value)}
+                placeholder="e.g. MAXV, LEWIS, ALONSO"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
+                autoFocus
+              />
+            </div>
             <button
               type="submit"
-              className="w-full py-3 bg-cyan-500 text-black font-bold text-xs rounded-xl hover:bg-cyan-400 transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+              className="w-full py-3 bg-cyan-500 text-black font-extrabold text-xs rounded-xl hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(6,182,212,0.4)]"
             >
-              INITIALIZE COCKPIT
+              AUTHORIZE & LAUNCH COCKPIT
             </button>
           </form>
         </div>
@@ -74,21 +77,22 @@ export default function GBotIndex() {
   return (
     <div className="min-h-screen bg-[#06070B] text-white font-sans antialiased selection:bg-cyan-500 selection:text-black font-mono">
       {/* Top Header Bar */}
-      <header className="border-b border-white/10 px-6 py-4 flex flex-wrap justify-between items-center gap-4 bg-black/40 backdrop-blur-md">
+      <header className="border-b border-white/10 px-6 py-4 flex flex-wrap justify-between items-center gap-4 bg-black/60 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center space-x-3">
           <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse" />
           <span className="text-xs tracking-widest text-cyan-400 font-bold">G-BOT // DIOSCURI CORE ({variableIdentifierCheck})</span>
         </div>
         <div className="flex items-center space-x-4 text-xs text-white/70">
-          <span>PILOT: <strong className="text-white">{driverName}</strong></span>
+          <span>RACER: <strong className="text-cyan-300">{driverName}</strong></span>
           <button 
             onClick={() => setDriverName('')} 
-            className="text-[10px] text-cyan-400 hover:underline border border-cyan-500/30 px-2 py-0.5 rounded"
+            className="text-[10px] text-white/50 hover:text-cyan-400 underline transition-colors"
           >
-            SWITCH
+            LOGOUT
           </button>
-          <span className="hidden md:inline">ENTITY: <strong className="text-cyan-400">AYUBHUSSAIN-NO-ID</strong></span>
-          <span className="px-3 py-1 rounded bg-white/5 border border-white/10 text-cyan-300 text-[10px]">SECURE LINK ACTIVE</span>
+          <span className="hidden md:inline text-white/20">|</span>
+          <span className="hidden md:inline">ENTITY: <strong className="text-white/80">AYUBHUSSAIN-NO-ID</strong></span>
+          <span className="px-3 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[10px]">SECURE LINK ACTIVE</span>
         </div>
       </header>
 
