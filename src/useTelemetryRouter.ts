@@ -73,4 +73,3 @@ export function useTelemetryRouter() {
 
   return { ingestFileParallel, isReady, ingestTimeMs, streams, headers, liveRows };
 }
-}
