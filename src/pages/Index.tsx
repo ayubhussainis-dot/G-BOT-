@@ -21,6 +21,7 @@ export default function GBotIndex() {
   const [inputName, setInputName] = useState('');
   const [inputCode, setInputCode] = useState('');
   const [loginCode, setLoginCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -118,17 +119,26 @@ export default function GBotIndex() {
                 />
               </div>
 
-              {/* Bottom Field: Racer Code / Password */}
+              {/* Bottom Field: Racer Code / Password with Show/Hide Toggle */}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
-                <input
-                  type="password"
-                  value={inputCode}
-                  onChange={(e) => setInputCode(e.target.value)}
-                  placeholder="Enter secure code..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={inputCode}
+                    onChange={(e) => setInputCode(e.target.value)}
+                    placeholder="Enter secure code..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-16 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold uppercase px-2 py-1 bg-white/5 rounded border border-white/10"
+                  >
+                    {showPassword ? "HIDE" : "SHOW"}
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-2 pt-2">
@@ -158,14 +168,23 @@ export default function GBotIndex() {
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
-                <input
-                  type="password"
-                  value={loginCode}
-                  onChange={(e) => setLoginCode(e.target.value)}
-                  placeholder="Enter code..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={loginCode}
+                    onChange={(e) => setLoginCode(e.target.value)}
+                    placeholder="Enter code..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-16 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold uppercase px-2 py-1 bg-white/5 rounded border border-white/10"
+                  >
+                    {showPassword ? "HIDE" : "SHOW"}
+                  </button>
+                </div>
               </div>
               <div className="flex gap-2 pt-2">
                 <button
@@ -267,13 +286,13 @@ export default function GBotIndex() {
               </div>
             </div>
 
-            {/* FULL-SCREEN VIEW 1: COLOR-CODED CSV TELEMETRY INSPECTOR */}
+            {/* FULL-SCREEN VIEW 1: ROW-BY-ROW COLOR-CODED CSV TELEMETRY INSPECTOR */}
             {activeView === 'inspector' && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-extrabold text-white tracking-wider uppercase">Stage II // Raw Telemetry Sequence Inspector</h2>
-                    <p className="text-xs text-white/50">Full-screen color-coded trace breakdown parsed from the uploaded CSV stream.</p>
+                    <p className="text-xs text-white/50">Full-screen row-by-row color-coded trace breakdown parsed from the uploaded CSV stream.</p>
                   </div>
                   <button
                     onClick={() => setActiveView('cockpit')}
@@ -284,11 +303,11 @@ export default function GBotIndex() {
                   </button>
                 </div>
 
-                {/* Color-Coded Data Grid */}
+                {/* Row-by-Row Color-Coded Data Grid */}
                 <div className="border border-cyan-500/30 rounded-2xl bg-black/60 backdrop-blur-xl overflow-hidden shadow-2xl">
                   <div className="overflow-x-auto max-h-[550px] scrollbar-thin scrollbar-thumb-cyan-500/20">
                     <table className="w-full text-left border-collapse text-xs">
-                      <thead className="bg-cyan-950/40 text-cyan-300 font-mono sticky top-0 border-b border-cyan-500/30">
+                      <thead className="bg-cyan-950/40 text-cyan-300 font-mono sticky top-0 border-b border-cyan-500/30 z-10">
                         <tr>
                           <th className="p-4">FRAME ID</th>
                           <th className="p-4">SPEED (KM/H)</th>
@@ -300,40 +319,34 @@ export default function GBotIndex() {
                       </thead>
                       <tbody className="divide-y divide-white/5 font-mono">
                         {frames.map((frame, i) => {
-                          const isHighSpeed = frame.speed > 250;
-                          const isHardBraking = frame.brake > 50;
-                          const isFullThrottle = frame.throttle > 90;
+                          // Distinct row-by-row color cycling based on index/lap sequences
+                          const rowColorSchemes = [
+                            'bg-cyan-950/20 text-cyan-200 border-l-4 border-cyan-500',
+                            'bg-blue-950/20 text-blue-200 border-l-4 border-blue-500',
+                            'bg-emerald-950/20 text-emerald-200 border-l-4 border-emerald-500',
+                            'bg-indigo-950/20 text-indigo-200 border-l-4 border-indigo-500',
+                            'bg-purple-950/20 text-purple-200 border-l-4 border-purple-500'
+                          ];
+                          const activeRowStyle = rowColorSchemes[i % rowColorSchemes.length];
 
                           return (
-                            <tr key={i} className="hover:bg-cyan-500/[0.04] transition-colors">
-                              <td className="p-4 text-white/40">#{i + 1}</td>
-                              <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded font-bold ${
-                                  isHighSpeed ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'text-white/80'
-                                }`}>
-                                  {frame.speed.toFixed(1)} km/h
-                                </span>
+                            <tr key={i} className={`${activeRowStyle} hover:brightness-125 transition-all`}>
+                              <td className="p-4 font-bold opacity-70">#{i + 1}</td>
+                              <td className="p-4 font-extrabold">
+                                {frame.speed.toFixed(1)} km/h
                               </td>
-                              <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded font-bold ${
-                                  isFullThrottle ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'text-white/60'
-                                }`}>
-                                  {frame.throttle.toFixed(1)}%
-                                </span>
+                              <td className="p-4 font-semibold">
+                                {frame.throttle.toFixed(1)}%
                               </td>
-                              <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded font-bold ${
-                                  isHardBraking ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'text-white/60'
-                                }`}>
-                                  {frame.brake.toFixed(1)}%
-                                </span>
+                              <td className="p-4 font-semibold">
+                                {frame.brake.toFixed(1)}%
                               </td>
-                              <td className="p-4 text-cyan-200">
+                              <td className="p-4 font-semibold">
                                 {frame.steeringAngle.toFixed(2)}°
                               </td>
                               <td className="p-4">
-                                <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/70">
-                                  {isHardBraking ? 'HEAVY BRAKING ZONE' : isFullThrottle ? 'FULL THROTTLE STINT' : 'STABLE TRANSITION'}
+                                <span className="text-[10px] px-2.5 py-1 rounded bg-black/40 border border-white/10 uppercase tracking-widest font-bold">
+                                  {frame.brake > 50 ? 'HEAVY BRAKING' : frame.throttle > 90 ? 'FULL THROTTLE' : 'STABLE STINT'}
                                 </span>
                               </td>
                             </tr>
