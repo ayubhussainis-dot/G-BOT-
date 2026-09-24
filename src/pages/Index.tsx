@@ -18,22 +18,22 @@ export default function GBotIndex() {
   const [activeFilename, setActiveFilename] = useState<string>('No session file loaded');
   const [activeView, setActiveView] = useState<'inspector' | 'cockpit'>('inspector');
 
-  const [inputCode, setInputCode] = useState('');
   const [inputName, setInputName] = useState('');
+  const [inputCode, setInputCode] = useState('');
   const [loginCode, setLoginCode] = useState('');
   const [authError, setAuthError] = useState('');
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputCode.trim() || !inputName.trim()) {
-      setAuthError('Please fill in both Racer Code and Racer Name.');
+    if (!inputName.trim() || !inputCode.trim()) {
+      setAuthError('Please fill in both Racer Name and Racer Code.');
       return;
     }
-    const code = inputCode.trim().toUpperCase();
     const name = inputName.trim().toUpperCase();
-    setRegisteredAccounts(prev => ({ ...prev, [code]: { code, name } }));
-    setRacerCode(code);
+    const code = inputCode.trim().toUpperCase();
+    setRegisteredAccounts(prev => ({ ...prev, [code]: { name, code } }));
     setRacerName(name);
+    setRacerCode(code);
   };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -41,8 +41,8 @@ export default function GBotIndex() {
     const code = loginCode.trim().toUpperCase();
     const account = registeredAccounts[code];
     if (account) {
-      setRacerCode(account.code);
       setRacerName(account.name);
+      setRacerCode(account.code);
     } else {
       setAuthError('Racer Code not found. Please create an account.');
     }
@@ -104,19 +104,10 @@ export default function GBotIndex() {
                 <p className="text-xs text-white/50">Set up your unique racer credentials.</p>
               </div>
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
+              
+              {/* Top Field: Racer Name / Call Sign */}
               <div className="space-y-1">
-                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code (e.g. MAXV, LEWIS)</label>
-                <input
-                  type="text"
-                  value={inputCode}
-                  onChange={(e) => setInputCode(e.target.value)}
-                  placeholder="e.g. MAXV"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Username (e.g. Max Verstappen)</label>
+                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Call Sign</label>
                 <input
                   type="text"
                   value={inputName}
@@ -126,6 +117,20 @@ export default function GBotIndex() {
                   required
                 />
               </div>
+
+              {/* Bottom Field: Racer Code / Password */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
+                <input
+                  type="password"
+                  value={inputCode}
+                  onChange={(e) => setInputCode(e.target.value)}
+                  placeholder="Enter secure code..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
+                  required
+                />
+              </div>
+
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
@@ -148,16 +153,16 @@ export default function GBotIndex() {
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1">
                 <h2 className="text-lg font-bold text-white">Racer Sign In</h2>
-                <p className="text-xs text-white/50">Enter your assigned racer code.</p>
+                <p className="text-xs text-white/50">Enter your assigned racer code / password.</p>
               </div>
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
               <div className="space-y-1">
-                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code</label>
+                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
                 <input
-                  type="text"
+                  type="password"
                   value={loginCode}
                   onChange={(e) => setLoginCode(e.target.value)}
-                  placeholder="e.g. MAXV"
+                  placeholder="Enter code..."
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
                   required
                 />
