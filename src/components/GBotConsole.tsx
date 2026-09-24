@@ -185,7 +185,7 @@ function answerQuestion(
   };
 }
 
-export default function GBotConsole({
+export function GBotConsole({
   prediction,
 }: GBotConsoleProps) {
   const [question, setQuestion] = useState("");
@@ -297,3 +297,5 @@ export default function GBotConsole({
     </section>
   );
 }
+
+export default GBotConsole;
