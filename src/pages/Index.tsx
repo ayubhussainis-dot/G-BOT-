@@ -43,9 +43,6 @@ export default function GBotIndex() {
     if (account) {
       setRacerCode(account.code);
       setRacerName(account.name);
-    } else if (code === 'ABUH') {
-      setRacerCode('ABUH');
-      setRacerName('ABUH HUSSAIN');
     } else {
       setAuthError('Racer Code not found. Please create an account.');
     }
@@ -57,7 +54,7 @@ export default function GBotIndex() {
     const result = computeStintIntelligence(loadedFrames);
     setPrediction(result);
     setSessionActive(true);
-    setActiveView('inspector'); // First view is the colorful CSV telemetry inspector
+    setActiveView('inspector');
   };
 
   const handleReset = () => {
@@ -68,7 +65,6 @@ export default function GBotIndex() {
     setActiveView('inspector');
   };
 
-  // 1. AUTHENTICATION & ACCOUNT CREATION SUITE
   if (!racerName) {
     return (
       <div className="min-h-screen bg-[#06070B] text-white flex items-center justify-center font-mono px-4">
@@ -109,23 +105,23 @@ export default function GBotIndex() {
               </div>
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
               <div className="space-y-1">
-                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code (e.g. ABUH, MAXV)</label>
+                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code (e.g. MAXV, LEWIS)</label>
                 <input
                   type="text"
                   value={inputCode}
                   onChange={(e) => setInputCode(e.target.value)}
-                  placeholder="Enter secure code..."
+                  placeholder="e.g. MAXV"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Username</label>
+                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Username (e.g. Max Verstappen)</label>
                 <input
                   type="text"
                   value={inputName}
                   onChange={(e) => setInputName(e.target.value)}
-                  placeholder="Enter full racer name..."
+                  placeholder="e.g. Max Verstappen"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
                   required
                 />
@@ -161,7 +157,7 @@ export default function GBotIndex() {
                   type="text"
                   value={loginCode}
                   onChange={(e) => setLoginCode(e.target.value)}
-                  placeholder="e.g. ABUH"
+                  placeholder="e.g. MAXV"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
                   required
                 />
@@ -299,7 +295,6 @@ export default function GBotIndex() {
                       </thead>
                       <tbody className="divide-y divide-white/5 font-mono">
                         {frames.map((frame, i) => {
-                          // Dynamic color coding based on thresholds
                           const isHighSpeed = frame.speed > 250;
                           const isHardBraking = frame.brake > 50;
                           const isFullThrottle = frame.throttle > 90;
@@ -349,7 +344,6 @@ export default function GBotIndex() {
             {/* FULL-SCREEN VIEW 2: PITWALL COCKPIT & COACH */}
             {activeView === 'cockpit' && (
               <div className="space-y-8 animate-fadeIn">
-                {/* Live Telemetry Hero Matrix */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 backdrop-blur-xl shadow-xl">
                     <p className="text-xs text-white/50 uppercase">Stint Integrity Index</p>
@@ -382,7 +376,6 @@ export default function GBotIndex() {
                   </div>
                 </div>
 
-                {/* GBot Pitwall Console (Full Section) */}
                 <GBotConsole frames={frames} prediction={prediction} driverName={racerName} />
               </div>
             )}
