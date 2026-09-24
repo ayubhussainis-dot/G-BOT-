@@ -1,16 +1,30 @@
 // G-BOT Autonomous Intelligence Platform - Master Dashboard
 // Written by GemInEye
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { computeStintIntelligence, TelemetryFrame, StintPrediction, variableIdentifierCheck } from '../lib/engine';
 import { UploadPanel } from '../components/UploadPanel';
 import { GBotConsole } from '../components/GBotConsole';
+
+interface Account {
+  name: string;
+  code: string;
+}
 
 export default function GBotIndex() {
   const [authStep, setAuthStep] = useState<'welcome' | 'register' | 'login'>('welcome');
   const [racerCode, setRacerCode] = useState<string>('');
   const [racerName, setRacerName] = useState<string>('');
-  const [registeredAccounts, setRegisteredAccounts] = useState<Record<string, { name: string; code: string }>>({});
+  
+  // Persist accounts in localStorage so they don't vanish on reload
+  const [registeredAccounts, setRegisteredAccounts] = useState<Record<string, Account>>(() => {
+    try {
+      const saved = localStorage.getItem('gbot_accounts');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   
   const [sessionActive, setSessionActive] = useState(false);
   const [frames, setFrames] = useState<TelemetryFrame[]>([]);
@@ -20,9 +34,20 @@ export default function GBotIndex() {
 
   const [inputName, setInputName] = useState('');
   const [inputCode, setInputCode] = useState('');
+  
+  const [loginName, setLoginName] = useState('');
   const [loginCode, setLoginCode] = useState('');
+  
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('gbot_accounts', JSON.stringify(registeredAccounts));
+    } catch (e) {
+      console.error('Failed to save accounts', e);
+    }
+  }, [registeredAccounts]);
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,20 +57,28 @@ export default function GBotIndex() {
     }
     const name = inputName.trim().toUpperCase();
     const code = inputCode.trim().toUpperCase();
-    setRegisteredAccounts(prev => ({ ...prev, [code]: { name, code } }));
+
+    const updatedAccounts = { ...registeredAccounts, [name]: { name, code } };
+    setRegisteredAccounts(updatedAccounts);
     setRacerName(name);
     setRacerCode(code);
   };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!loginName.trim() || !loginCode.trim()) {
+      setAuthError('Please provide both Racer Name and Racer Code.');
+      return;
+    }
+    const name = loginName.trim().toUpperCase();
     const code = loginCode.trim().toUpperCase();
-    const account = registeredAccounts[code];
-    if (account) {
+
+    const account = registeredAccounts[name];
+    if (account && account.code === code) {
       setRacerName(account.name);
       setRacerCode(account.code);
     } else {
-      setAuthError('Racer Code not found. Please create an account.');
+      setAuthError('Invalid Racer Name or Racer Code/Password.');
     }
   };
 
@@ -92,7 +125,7 @@ export default function GBotIndex() {
                   onClick={() => { setAuthStep('login'); setAuthError(''); }}
                   className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs rounded-xl transition-colors"
                 >
-                  SIGN IN WITH RACER CODE
+                  SIGN IN WITH CREDENTIALS
                 </button>
               </div>
             </div>
@@ -163,9 +196,24 @@ export default function GBotIndex() {
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1">
                 <h2 className="text-lg font-bold text-white">Racer Sign In</h2>
-                <p className="text-xs text-white/50">Enter your assigned racer code / password.</p>
+                <p className="text-xs text-white/50">Enter your racer name and secure password code.</p>
               </div>
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
+              
+              {/* Top Field: Racer Name */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Call Sign</label>
+                <input
+                  type="text"
+                  value={loginName}
+                  onChange={(e) => setLoginName(e.target.value)}
+                  placeholder="Enter racer name..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-white/30 focus:outline-none focus:border-cyan-500 transition-colors"
+                  required
+                />
+              </div>
+
+              {/* Bottom Field: Racer Code / Password */}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
                 <div className="relative">
@@ -186,6 +234,7 @@ export default function GBotIndex() {
                   </button>
                 </div>
               </div>
+
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
