@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { StintPrediction } from "../lib/engine";
 
 interface GBotConsoleProps {
@@ -35,7 +35,9 @@ function answerQuestion(
       text:
         prediction.predictivePerformanceGap === null
           ? "PPG cannot be calculated from this session alone. G-BOT requires a valid comparable reference or baseline lap."
-          : `Measured reference comparison indicates a performance gap of ${prediction.predictivePerformanceGap.toFixed(3)} s.`,
+          : `Measured reference comparison indicates a performance gap of ${prediction.predictivePerformanceGap.toFixed(
+              3
+            )} s.`,
       evidence:
         prediction.predictivePerformanceGap === null
           ? "INSUFFICIENT_DATA"
@@ -43,10 +45,7 @@ function answerQuestion(
     };
   }
 
-  if (
-    q.includes("brake") ||
-    q.includes("braking")
-  ) {
+  if (q.includes("brake") || q.includes("braking")) {
     if (measurements.maxBrake === null) {
       return {
         text: "Brake-channel data is not present in the imported session.",
@@ -62,10 +61,7 @@ function answerQuestion(
     };
   }
 
-  if (
-    q.includes("steering") ||
-    q.includes("steer")
-  ) {
+  if (q.includes("steering") || q.includes("steer")) {
     if (measurements.steeringVariation === null) {
       return {
         text: "Steering data is not available in the imported session.",
@@ -81,10 +77,7 @@ function answerQuestion(
     };
   }
 
-  if (
-    q.includes("speed") ||
-    q.includes("velocity")
-  ) {
+  if (q.includes("speed") || q.includes("velocity")) {
     if (
       measurements.averageSpeed === null &&
       measurements.maxSpeed === null
@@ -97,12 +90,12 @@ function answerQuestion(
 
     const average =
       measurements.averageSpeed !== null
-        ? `${measurements.averageSpeed.toFixed(1)}`
+        ? measurements.averageSpeed.toFixed(1)
         : "—";
 
     const maximum =
       measurements.maxSpeed !== null
-        ? `${measurements.maxSpeed.toFixed(1)}`
+        ? measurements.maxSpeed.toFixed(1)
         : "—";
 
     return {
@@ -111,10 +104,7 @@ function answerQuestion(
     };
   }
 
-  if (
-    q.includes("throttle") ||
-    q.includes("accelerator")
-  ) {
+  if (q.includes("throttle") || q.includes("accelerator")) {
     if (measurements.averageThrottle === null) {
       return {
         text: "Throttle data is not available in the imported session.",
@@ -201,14 +191,12 @@ export default function GBotConsole({
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ConsoleMessage[]>([]);
 
-  const status = useMemo(() => {
-    if (!prediction) return "NO SESSION";
-    return prediction.dataQuality.status;
-  }, [prediction]);
-
   function ask() {
     const q = question.trim();
-    if (!q) return;
+
+    if (!q) {
+      return;
+    }
 
     const response = answerQuestion(q, prediction);
 
@@ -236,11 +224,16 @@ export default function GBotConsole({
     }
   }
 
+  const status = prediction
+    ? prediction.dataQuality.status
+    : "NO SESSION";
+
   return (
     <section className="gbot-panel-cyan rounded-2xl p-5">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <div className="gbot-label">G-BOT COACH</div>
+
           <h2 className="mt-1 text-lg font-semibold text-white">
             Session Intelligence Console
           </h2>
@@ -286,4 +279,21 @@ export default function GBotConsole({
 
       <div className="flex gap-2">
         <input
-          value={
+          value={question}
+          onChange={(event) => setQuestion(event.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask G-BOT about this session..."
+          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400/50"
+        />
+
+        <button
+          type="button"
+          onClick={ask}
+          className="rounded-xl border border-cyan-400/40 bg-cyan-400/10 px-5 py-3 text-xs font-semibold tracking-widest text-cyan-300 transition hover:bg-cyan-400/20"
+        >
+          ASK
+        </button>
+      </div>
+    </section>
+  );
+}
