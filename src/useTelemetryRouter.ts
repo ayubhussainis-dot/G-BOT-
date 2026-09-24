@@ -43,28 +43,38 @@ export function useTelemetryRouter() {
 
         let activeHeaders = headers;
         if (payload.calculatorIndex === 0 && payload.headers) {
-           activeHeaders = payload.headers;
+           // Strip surrounding quotes and whitespace from headers
+           activeHeaders = payload.headers.map((h: string) => h.replace(/^["']|["']$/g, '').trim());
            setHeaders(activeHeaders);
         }
 
         if (payload.calculatorIndex === 0) {
            setLiveRows(payload.rawRows);
            
-           const vxIdx = activeHeaders.findIndex((h: string) => h.toLowerCase() === 'velocity_x');
-           const vyIdx = activeHeaders.findIndex((h: string) => h.toLowerCase() === 'velocity_y');
-           const vzIdx = activeHeaders.findIndex((h: string) => h.toLowerCase() === 'velocity_z');
-           const brakeIdx = activeHeaders.findIndex((h: string) => h.toLowerCase() === 'brake');
+           // Robust search handling quotes, case, and variations
+           const cleanHeader = (h: string) => h.replace(/^["']|["']$/g, '').trim().toLowerCase();
+           
+           const vxIdx = activeHeaders.findIndex((h: string) => cleanHeader(h).includes('velocity_x') || cleanHeader(h) === 'speed');
+           const vyIdx = activeHeaders.findIndex((h: string) => cleanHeader(h).includes('velocity_y'));
+           const vzIdx = activeHeaders.findIndex((h: string) => cleanHeader(h).includes('velocity_z'));
+           const brakeIdx = activeHeaders.findIndex((h: string) => cleanHeader(h).includes('brake'));
+
+           const parseVal = (val: any) => {
+             if (val === undefined || val === null) return 0;
+             const cleaned = String(val).replace(/^["']|["']$/g, '').trim();
+             return Number(cleaned) || 0;
+           };
 
            const velocities = payload.rawRows.map((r: any) => {
-             const x = vxIdx !== -1 ? Number(r[vxIdx]) || 0 : 0;
-             const y = vyIdx !== -1 ? Number(r[vyIdx]) || 0 : 0;
-             const z = vzIdx !== -1 ? Number(r[vzIdx]) || 0 : 0;
+             const x = vxIdx !== -1 ? parseVal(r[vxIdx]) : 0;
+             const y = vyIdx !== -1 ? parseVal(r[vyIdx]) : 0;
+             const z = vzIdx !== -1 ? parseVal(r[vzIdx]) : 0;
              const mag = Math.sqrt(x * x + y * y + z * z);
-             return mag > 0 ? mag * 3.6 : (vxIdx !== -1 ? Number(r[vxIdx]) || 0 : 0);
+             return mag > 0 ? mag * 3.6 : x;
            });
 
            const brakes = payload.rawRows.map((r: any) => {
-             return brakeIdx !== -1 ? Number(r[brakeIdx]) || 0 : 0;
+             return brakeIdx !== -1 ? parseVal(r[brakeIdx]) : 0;
            });
 
            setStreams({
@@ -80,21 +90,29 @@ export function useTelemetryRouter() {
         if (completedCalculators === NUM_CALCULATORS) {
            const allRows = chunkMap.flat();
            setLiveRows(allRows);
-           const vxIdx = headers.findIndex((h: string) => h.toLowerCase() === 'velocity_x');
-           const vyIdx = headers.findIndex((h: string) => h.toLowerCase() === 'velocity_y');
-           const vzIdx = headers.findIndex((h: string) => h.toLowerCase() === 'velocity_z');
-           const brakeIdx = headers.findIndex((h: string) => h.toLowerCase() === 'brake');
+           
+           const cleanHeader = (h: string) => h.replace(/^["']|["']$/g, '').trim().toLowerCase();
+           const vxIdx = headers.findIndex((h: string) => cleanHeader(h).includes('velocity_x') || cleanHeader(h) === 'speed');
+           const vyIdx = headers.findIndex((h: string) => cleanHeader(h).includes('velocity_y'));
+           const vzIdx = headers.findIndex((h: string) => cleanHeader(h).includes('velocity_z'));
+           const brakeIdx = headers.findIndex((h: string) => cleanHeader(h).includes('brake'));
+
+           const parseVal = (val: any) => {
+             if (val === undefined || val === null) return 0;
+             const cleaned = String(val).replace(/^["']|["']$/g, '').trim();
+             return Number(cleaned) || 0;
+           };
 
            const velocities = allRows.map((r: any) => {
-             const x = vxIdx !== -1 ? Number(r[vxIdx]) || 0 : 0;
-             const y = vyIdx !== -1 ? Number(r[vyIdx]) || 0 : 0;
-             const z = vzIdx !== -1 ? Number(r[vzIdx]) || 0 : 0;
+             const x = vxIdx !== -1 ? parseVal(r[vxIdx]) : 0;
+             const y = vyIdx !== -1 ? parseVal(r[vyIdx]) : 0;
+             const z = vzIdx !== -1 ? parseVal(r[vzIdx]) : 0;
              const mag = Math.sqrt(x * x + y * y + z * z);
-             return mag > 0 ? mag * 3.6 : (vxIdx !== -1 ? Number(r[vxIdx]) || 0 : 0);
+             return mag > 0 ? mag * 3.6 : x;
            });
 
            const brakes = allRows.map((r: any) => {
-             return brakeIdx !== -1 ? Number(r[brakeIdx]) || 0 : 0;
+             return brakeIdx !== -1 ? parseVal(r[brakeIdx]) : 0;
            });
 
            setStreams({
