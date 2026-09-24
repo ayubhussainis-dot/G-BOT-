@@ -16,7 +16,6 @@ export default function GBotIndex() {
   const [racerCode, setRacerCode] = useState<string>('');
   const [racerName, setRacerName] = useState<string>('');
   
-  // Persist accounts in localStorage so they don't vanish on reload
   const [registeredAccounts, setRegisteredAccounts] = useState<Record<string, Account>>(() => {
     try {
       const saved = localStorage.getItem('gbot_accounts');
@@ -102,7 +101,7 @@ export default function GBotIndex() {
   if (!racerName) {
     return (
       <div className="min-h-screen bg-[#06070B] text-white flex items-center justify-center font-mono px-4">
-        <div className="max-w-md w-full p-8 rounded-2xl bg-black/80 border border-cyan-500/40 backdrop-blur-2xl space-y-6 shadow-[0_0_50px_rgba(6,182,212,0.15)] animate-fadeIn">
+        <div className="max-w-md w-full p-8 rounded-2xl bg-black/90 border border-cyan-500/40 backdrop-blur-2xl space-y-6 shadow-[0_0_50px_rgba(6,182,212,0.15)] animate-fadeIn">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-xs tracking-widest text-cyan-400 font-bold uppercase">G-BOT // AUTHENTICATION GATE</span>
@@ -139,7 +138,6 @@ export default function GBotIndex() {
               </div>
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
               
-              {/* Top Field: Racer Name / Call Sign */}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Call Sign</label>
                 <input
@@ -152,7 +150,6 @@ export default function GBotIndex() {
                 />
               </div>
 
-              {/* Bottom Field: Racer Code / Password with Show/Hide Toggle */}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
                 <div className="relative">
@@ -200,7 +197,6 @@ export default function GBotIndex() {
               </div>
               {authError && <p className="text-xs text-red-400 bg-red-950/30 p-2 rounded border border-red-500/30">{authError}</p>}
               
-              {/* Top Field: Racer Name */}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Name / Call Sign</label>
                 <input
@@ -213,7 +209,6 @@ export default function GBotIndex() {
                 />
               </div>
 
-              {/* Bottom Field: Racer Code / Password */}
               <div className="space-y-1">
                 <label className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Racer Code / Password</label>
                 <div className="relative">
@@ -335,13 +330,13 @@ export default function GBotIndex() {
               </div>
             </div>
 
-            {/* FULL-SCREEN VIEW 1: ROW-BY-ROW COLOR-CODED CSV TELEMETRY INSPECTOR */}
+            {/* FULL-SCREEN VIEW 1: NEON ROW-BY-ROW COLOR-CODED CSV TELEMETRY INSPECTOR */}
             {activeView === 'inspector' && (
               <div className="space-y-6 animate-fadeIn">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-extrabold text-white tracking-wider uppercase">Stage II // Raw Telemetry Sequence Inspector</h2>
-                    <p className="text-xs text-white/50">Full-screen row-by-row color-coded trace breakdown parsed from the uploaded CSV stream.</p>
+                    <p className="text-xs text-white/50">Full-screen neon row-by-row color trace breakdown parsed from the uploaded CSV stream.</p>
                   </div>
                   <button
                     onClick={() => setActiveView('cockpit')}
@@ -352,11 +347,11 @@ export default function GBotIndex() {
                   </button>
                 </div>
 
-                {/* Row-by-Row Opaque Background Color-Coded Data Grid */}
-                <div className="border border-cyan-500/30 rounded-2xl bg-black/60 backdrop-blur-xl overflow-hidden shadow-2xl">
+                {/* Neon Row-by-Row Opaque Background Data Grid */}
+                <div className="border border-cyan-500/30 rounded-2xl bg-black/80 backdrop-blur-xl overflow-hidden shadow-2xl">
                   <div className="overflow-x-auto max-h-[550px] scrollbar-thin scrollbar-thumb-cyan-500/20">
                     <table className="w-full text-left border-collapse text-xs">
-                      <thead className="bg-cyan-950/60 text-cyan-300 font-mono sticky top-0 border-b border-cyan-500/30 z-10">
+                      <thead className="bg-black text-cyan-400 font-mono sticky top-0 border-b border-cyan-500/40 z-10">
                         <tr>
                           <th className="p-4">FRAME ID</th>
                           <th className="p-4">SPEED (KM/H)</th>
@@ -366,20 +361,20 @@ export default function GBotIndex() {
                           <th className="p-4">DIAGNOSTIC STATUS</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/10 font-mono">
+                      <tbody className="divide-y divide-black/40 font-mono">
                         {frames.map((frame, i) => {
-                          const rowBgColors = [
-                            'bg-[#0a192f] text-cyan-200 border-l-4 border-cyan-500',
-                            'bg-[#102a43] text-blue-200 border-l-4 border-blue-500',
-                            'bg-[#064e3b] text-emerald-200 border-l-4 border-emerald-500',
-                            'bg-[#311043] text-purple-200 border-l-4 border-purple-500',
-                            'bg-[#431010] text-rose-200 border-l-4 border-rose-500'
+                          // High-impact neon background rows cycling Neon Yellow, Neon Orange, Neon Blue, Neon Red
+                          const neonRowColors = [
+                            'bg-[#1a1a00] text-yellow-300 border-l-4 border-yellow-400', // Neon Yellow Theme
+                            'bg-[#261100] text-orange-300 border-l-4 border-orange-500', // Neon Orange Theme
+                            'bg-[#001a26] text-cyan-300 border-l-4 border-cyan-400',   // Neon Blue Theme
+                            'bg-[#260000] text-red-300 border-l-4 border-red-500'      // Neon Red Theme
                           ];
-                          const activeRowStyle = rowBgColors[i % rowBgColors.length];
+                          const activeNeonStyle = neonRowColors[i % neonRowColors.length];
 
                           return (
-                            <tr key={i} className={`${activeRowStyle} hover:brightness-125 transition-all`}>
-                              <td className="p-4 font-bold opacity-80">#{i + 1}</td>
+                            <tr key={i} className={`${activeNeonStyle} hover:brightness-125 transition-all`}>
+                              <td className="p-4 font-bold opacity-90">#{i + 1}</td>
                               <td className="p-4 font-extrabold">
                                 {frame.speed.toFixed(1)} km/h
                               </td>
@@ -393,7 +388,7 @@ export default function GBotIndex() {
                                 {frame.steeringAngle.toFixed(2)}°
                               </td>
                               <td className="p-4">
-                                <span className="text-[10px] px-2.5 py-1 rounded bg-black/60 border border-white/20 uppercase tracking-widest font-bold text-white">
+                                <span className="text-[10px] px-2.5 py-1 rounded bg-black/80 border border-white/20 uppercase tracking-widest font-bold text-white shadow">
                                   {frame.brake > 50 ? 'HEAVY BRAKING' : frame.throttle > 90 ? 'FULL THROTTLE' : 'STABLE STINT'}
                                 </span>
                               </td>
