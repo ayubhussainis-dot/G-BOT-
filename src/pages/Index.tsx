@@ -303,11 +303,11 @@ export default function GBotIndex() {
                   </button>
                 </div>
 
-                {/* Row-by-Row Color-Coded Data Grid */}
+                {/* Row-by-Row Opaque Background Color-Coded Data Grid */}
                 <div className="border border-cyan-500/30 rounded-2xl bg-black/60 backdrop-blur-xl overflow-hidden shadow-2xl">
                   <div className="overflow-x-auto max-h-[550px] scrollbar-thin scrollbar-thumb-cyan-500/20">
                     <table className="w-full text-left border-collapse text-xs">
-                      <thead className="bg-cyan-950/40 text-cyan-300 font-mono sticky top-0 border-b border-cyan-500/30 z-10">
+                      <thead className="bg-cyan-950/60 text-cyan-300 font-mono sticky top-0 border-b border-cyan-500/30 z-10">
                         <tr>
                           <th className="p-4">FRAME ID</th>
                           <th className="p-4">SPEED (KM/H)</th>
@@ -317,21 +317,20 @@ export default function GBotIndex() {
                           <th className="p-4">DIAGNOSTIC STATUS</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5 font-mono">
+                      <tbody className="divide-y divide-white/10 font-mono">
                         {frames.map((frame, i) => {
-                          // Distinct row-by-row color cycling based on index/lap sequences
-                          const rowColorSchemes = [
-                            'bg-cyan-950/20 text-cyan-200 border-l-4 border-cyan-500',
-                            'bg-blue-950/20 text-blue-200 border-l-4 border-blue-500',
-                            'bg-emerald-950/20 text-emerald-200 border-l-4 border-emerald-500',
-                            'bg-indigo-950/20 text-indigo-200 border-l-4 border-indigo-500',
-                            'bg-purple-950/20 text-purple-200 border-l-4 border-purple-500'
+                          const rowBgColors = [
+                            'bg-[#0a192f] text-cyan-200 border-l-4 border-cyan-500',
+                            'bg-[#102a43] text-blue-200 border-l-4 border-blue-500',
+                            'bg-[#064e3b] text-emerald-200 border-l-4 border-emerald-500',
+                            'bg-[#311043] text-purple-200 border-l-4 border-purple-500',
+                            'bg-[#431010] text-rose-200 border-l-4 border-rose-500'
                           ];
-                          const activeRowStyle = rowColorSchemes[i % rowColorSchemes.length];
+                          const activeRowStyle = rowBgColors[i % rowBgColors.length];
 
                           return (
                             <tr key={i} className={`${activeRowStyle} hover:brightness-125 transition-all`}>
-                              <td className="p-4 font-bold opacity-70">#{i + 1}</td>
+                              <td className="p-4 font-bold opacity-80">#{i + 1}</td>
                               <td className="p-4 font-extrabold">
                                 {frame.speed.toFixed(1)} km/h
                               </td>
@@ -345,7 +344,7 @@ export default function GBotIndex() {
                                 {frame.steeringAngle.toFixed(2)}°
                               </td>
                               <td className="p-4">
-                                <span className="text-[10px] px-2.5 py-1 rounded bg-black/40 border border-white/10 uppercase tracking-widest font-bold">
+                                <span className="text-[10px] px-2.5 py-1 rounded bg-black/60 border border-white/20 uppercase tracking-widest font-bold text-white">
                                   {frame.brake > 50 ? 'HEAVY BRAKING' : frame.throttle > 90 ? 'FULL THROTTLE' : 'STABLE STINT'}
                                 </span>
                               </td>
