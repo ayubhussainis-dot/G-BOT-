@@ -336,7 +336,6 @@ export default function GBotIndex() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-extrabold text-white tracking-wider uppercase">Stage II // Raw Telemetry Sequence Inspector</h2>
-                    <p className="text-xs text-white/50">Full-screen neon row-by-row color trace breakdown parsed from the uploaded CSV stream.</p>
                   </div>
                   <button
                     onClick={() => setActiveView('cockpit')}
@@ -363,12 +362,11 @@ export default function GBotIndex() {
                       </thead>
                       <tbody className="divide-y divide-black/40 font-mono">
                         {frames.map((frame, i) => {
-                          // High-impact neon background rows cycling Neon Yellow, Neon Orange, Neon Blue, Neon Red
                           const neonRowColors = [
-                            'bg-[#1a1a00] text-yellow-300 border-l-4 border-yellow-400', // Neon Yellow Theme
-                            'bg-[#261100] text-orange-300 border-l-4 border-orange-500', // Neon Orange Theme
-                            'bg-[#001a26] text-cyan-300 border-l-4 border-cyan-400',   // Neon Blue Theme
-                            'bg-[#260000] text-red-300 border-l-4 border-red-500'      // Neon Red Theme
+                            'bg-[#1a1a00] text-yellow-300 border-l-4 border-yellow-400',
+                            'bg-[#261100] text-orange-300 border-l-4 border-orange-500',
+                            'bg-[#001a26] text-cyan-300 border-l-4 border-cyan-400',
+                            'bg-[#260000] text-red-300 border-l-4 border-red-500'
                           ];
                           const activeNeonStyle = neonRowColors[i % neonRowColors.length];
 
