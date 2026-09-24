@@ -41,30 +41,38 @@ export function useTelemetryRouter() {
         const { payload } = event.data;
         chunkMap[payload.calculatorIndex] = payload.rawRows;
 
+        let activeHeaders = headers;
         if (payload.calculatorIndex === 0 && payload.headers) {
-           setHeaders(payload.headers);
+           activeHeaders = payload.headers;
+           setHeaders(activeHeaders);
         }
 
-        // PRIORITY TRIGGER: The exact millisecond Calculator 0 finishes, render the first page immediately!
         if (payload.calculatorIndex === 0) {
            setLiveRows(payload.rawRows);
+           
+           // Dynamically find actual column indexes from headers instead of hardcoding
+           const velIdx = activeHeaders.findIndex((h: string) => h.toLowerCase().includes('velocity') || h.toLowerCase().includes('speed'));
+           const brakeIdx = activeHeaders.findIndex((h: string) => h.toLowerCase().includes('brake'));
+
            setStreams({
-             'ALI3N_VELOCITY': { data: payload.rawRows.map((r: any) => Number(r[1]) || 0) },
-             'ALI3N_BRAKE': { data: payload.rawRows.map((r: any) => Number(r[3]) || 0) }
+             'ALI3N_VELOCITY': { data: payload.rawRows.map((r: any) => velIdx !== -1 ? Number(r[velIdx]) || 0 : 0) },
+             'ALI3N_BRAKE': { data: payload.rawRows.map((r: any) => brakeIdx !== -1 ? Number(r[brakeIdx]) || 0 : 0) }
            });
-           setIsReady(true); // Screen unlocks instantly with Page 1 results!
+           setIsReady(true);
         }
 
         completedCalculators++;
         worker.terminate();
 
-        // Background collection of remaining chunks
         if (completedCalculators === NUM_CALCULATORS) {
            const allRows = chunkMap.flat();
            setLiveRows(allRows);
+           const velIdx = headers.findIndex((h: string) => h.toLowerCase().includes('velocity') || h.toLowerCase().includes('speed'));
+           const brakeIdx = headers.findIndex((h: string) => h.toLowerCase().includes('brake'));
+
            setStreams({
-             'ALI3N_VELOCITY': { data: allRows.map((r: any) => Number(r[1]) || 0) },
-             'ALI3N_BRAKE': { data: allRows.map((r: any) => Number(r[3]) || 0) }
+             'ALI3N_VELOCITY': { data: allRows.map((r: any) => velIdx !== -1 ? Number(r[velIdx]) || 0 : 0) },
+             'ALI3N_BRAKE': { data: allRows.map((r: any) => brakeIdx !== -1 ? Number(r[brakeIdx]) || 0 : 0) }
            });
         }
       };
