@@ -38,7 +38,6 @@ export default function GBotIndex() {
     setActiveFilename('No session file loaded');
   };
 
-  // If driver has not set their call sign yet, show the secure authentication gate
   if (!driverName) {
     return (
       <div className="min-h-screen bg-[#06070B] text-white flex items-center justify-center font-mono px-4">
